@@ -10,7 +10,7 @@ type DependencyBuilder func() interface{}
 type Container struct {
 	singleBuilders  map[string]DependencyBuilder
 	factoryBuilders map[string]DependencyBuilder
-	cache           map[string]interface{}
+	cache           map[string]any
 }
 
 func CreateContainer() *Container {
@@ -21,21 +21,17 @@ func CreateContainer() *Container {
 	}
 }
 
-func Factory[T interface{}](c *Container, b DependencyBuilder) {
+func Factory[T any](c *Container, b DependencyBuilder) {
 	var temp T
 	c.factoryBuilders[reflect.TypeOf(temp).String()] = b
 }
 
-func Single[T interface{}](c *Container, b DependencyBuilder) {
+func Single[T any](c *Container, b DependencyBuilder) {
 	var dep T
 	c.singleBuilders[reflect.TypeOf(dep).String()] = b
 }
 
-func Instance[T interface{}](c *Container, dep T) {
-	c.cache[reflect.TypeOf(dep).String()] = dep
-}
-
-func Get[T interface{}](c *Container) T {
+func Get[T any](c *Container) T {
 	var temp T
 	typeStr := reflect.TypeOf(temp).String()
 

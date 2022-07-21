@@ -19,11 +19,6 @@ type Car struct {
 	Model string
 }
 
-type Shoe struct {
-	Brand string
-	Size  int
-}
-
 var container = CreateContainer()
 
 func get[T interface{}]() T {
@@ -35,46 +30,40 @@ func single[T interface{}](b DependencyBuilder) {
 func factory[T interface{}](b DependencyBuilder) {
 	Factory[T](container, b)
 }
-func instance[T interface{}](dep T) {
-	Instance[T](container, dep)
+
+type ComplexPerson struct {
+	Person
+	Car  Car
+	Home Place
 }
 
 func main() {
+	factory[ComplexPerson](func() interface{} {
+		return ComplexPerson{
+			get[Person](),
+			get[Car](),
+			get[Place](),
+		}
+	})
 	factory[Person](func() interface{} {
 		return Person{"Jason", 24}
 	})
 	factory[Place](func() interface{} {
 		return Place{"New York", "USA"}
 	})
+	factory[Car](func() interface{} {
+		return Car{"Toyota", "Hilux"}
+	})
 	single[*Car](func() interface{} {
 		return &Car{"Toyota", "Yaris"}
 	})
-	instance[*Shoe](&Shoe{"Nike", 10})
 
-	p1 := get[Person]()
-	p2 := get[Person]()
+	cp1 := get[ComplexPerson]()
+	cp2 := get[ComplexPerson]()
 
-	c1 := get[*Car]()
-	c2 := get[*Car]()
-
-	s1 := get[*Shoe]()
-	s2 := get[*Shoe]()
-
-	fmt.Printf("%#v\n", p1)
-	fmt.Printf("%#v\n", p2)
-	fmt.Printf("p1 == p2 => %#v\n", p1 == p2)
-	fmt.Printf("&p1 == &p2 => %#v\n", &p1 == &p2)
+	fmt.Printf("cp1 => %#v\n", cp1)
+	fmt.Printf("cp2 => %#v\n", cp2)
 	fmt.Println()
-
-	fmt.Printf("%#v\n", c1)
-	fmt.Printf("%#v\n", c2)
-	fmt.Printf("c1 == c2 => %#v\n", *c1 == *c2)
-	fmt.Printf("&c1 == &c2 => %#v\n", c1 == c2)
-	fmt.Println()
-
-	fmt.Printf("%#v\n", s1)
-	fmt.Printf("%#v\n", s2)
-	fmt.Printf("s1 == s2 => %#v\n", *s1 == *s2)
-	fmt.Printf("&s1 == &s2 => %#v\n", s1 == s2)
-
+	fmt.Printf("cp1:Address => %p\n", &cp1)
+	fmt.Printf("cp2:Address => %p\n", &cp2)
 }
